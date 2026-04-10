@@ -1,50 +1,47 @@
-name: MPF Data Auto-Pilot
+name: MPF Auto-Pilot Engine
 
 on:
-  # 1. 每日定時執行：香港時間晚上 8:30 (UTC 12:30)
   schedule:
     - cron: '30 12 * * *'
-  # 2. 允許在 GitHub 網頁上手動按鈕觸發 (測試用)
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  run-scraper-and-update:
+  run-scraper-and-sync:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: 取得專案代碼
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Step 2: 設定 Python 環境
       - name: Set up Python 3.9
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
-      # Step 3: 安裝爬蟲需要的依賴套件
+      # 【終極強制安裝指令】直接話畀機器知要裝咩，唔使再靠 requirements.txt
       - name: Install Dependencies
         run: |
-          cd data-engine
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python -m pip install requests beautifulsoup4 pandas
 
-      # Step 4: 執行爬蟲，並將 JSON 直接輸出到前端目錄供 Netlify 部署
-      - name: Run Data Intelligence Scraper
+      - name: Run Scraper and Generate Data
         run: |
           cd data-engine
           python scraper.py
-          # 確保前端 data 目錄存在
           mkdir -p ../frontend/public/data
-          # 將抓取最新的資料複製到前端
-          cp output/mpf_master_data.json ../frontend/public/data/mpf_master_data.json
+          cp output/mpf_master_data.json ../frontend/public/data/mpf_data.json
 
-      # Step 5: 將新數據 Commit 並推回 GitHub (這將自動觸發 Netlify 重建)
       - name: Commit and Push Data Update
         run: |
           git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action Bot"
-          git add frontend/public/data/mpf_master_data.json
-          # 如果沒有變動就不 commit，避免報錯
-          git diff --quiet && git diff --staged --quiet || git commit -m "🤖 Auto-sync: MPF Daily Data Update"
-          git push origin main
+          git config --local user.name "MPF Auto-Pilot Bot"
+          git add frontend/public/data/mpf_data.json
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "🤖 Auto-Sync: Update MPF Data"
+            git push origin main
+          else
+            echo "No data changes to commit."
+          fi
