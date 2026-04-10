@@ -1,79 +1,87 @@
-import requests
 import json
 import os
 import random
 from datetime import datetime
 
-class RealTimeMPFEngine:
+class MPFProfessionalEngine:
     def __init__(self):
-        self.api_url = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
-        self.headers = {'User-Agent': 'Mozilla/5.0'}
+        # 1. 分類映射 (Mapping Fix) - 專業分類翻譯機
+        self.MASTER_MAP = {
+            "股票": "股票基金",
+            "中港": "股票基金",
+            "大中華": "股票基金",
+            "北美": "股票基金",
+            "美股": "股票基金",
+            "環球": "股票基金",
+            "亞洲": "股票基金",
+            "歐洲": "股票基金",
+            "20": "混合資產基金",
+            "40": "混合資產基金",
+            "60": "混合資產基金",
+            "80": "混合資產基金",
+            "混合": "混合資產基金",
+            "平衡": "混合資產基金",
+            "增長": "混合資產基金",
+            "保守": "保守/保證基金",
+            "保證": "保守/保證基金",
+            "貨幣": "保守/保證基金",
+            "債券": "債券基金"
+        }
 
-    def get_real_market_change(self, ticker: str) -> float:
-        try:
-            res = requests.get(self.api_url.format(ticker=ticker), headers=self.headers)
-            data = res.json()
-            meta = data['chart']['result'][0]['meta']
-            prev_close = meta['chartPreviousClose']
-            current_price = meta['regularMarketPrice']
-            return round(((current_price - prev_close) / prev_close) * 100, 2)
-        except:
-            return 0.0
+    def map_category(self, raw_name: str) -> str:
+        """根據 MASTER_MAP 將市場雜亂名稱統一歸類"""
+        for key, standard_cat in self.MASTER_MAP.items():
+            if key in raw_name:
+                return standard_cat
+        return "其他基金"
 
-    def build_real_mpf_data(self):
-        print("[*] 啟動 DataPro 級數數據引擎...")
-        hsi_change = self.get_real_market_change("^HSI")
-        sp500_change = self.get_real_market_change("^GSPC")
+    def fetch_and_clean_data(self):
+        print("[*] 啟動專業級 MPF 數據清洗引擎...")
         
-        # 擴展基金清單 (模擬真實市場多樣性)
-        mpf_funds = [
-            {"code": "MAN001", "name": "宏利 MPF - 核心累積", "trustee": "宏利 Manulife", "cat": "混合資產", "nav": 15.42, "exp": "MIXED", "fer": 1.45, "size": 12500},
-            {"code": "MAN002", "name": "宏利 MPF - 北美股票", "trustee": "宏利 Manulife", "cat": "北美股票", "nav": 22.00, "exp": "US", "fer": 1.30, "size": 8400},
-            {"code": "BOC001", "name": "中銀保誠 - 香港股票", "trustee": "中銀保誠 BOC-PT", "cat": "香港股票", "nav": 14.80, "exp": "HK", "fer": 1.55, "size": 6200},
-            {"code": "BOC002", "name": "中銀保誠 - 北美跟蹤", "trustee": "中銀保誠 BOC-PT", "cat": "北美股票", "nav": 28.50, "exp": "US", "fer": 0.95, "size": 4100},
-            {"code": "HSB001", "name": "匯豐 - 智選恒指", "trustee": "匯豐 HSBC", "cat": "香港股票", "nav": 18.55, "exp": "HK", "fer": 0.75, "size": 25000},
-            {"code": "HSB002", "name": "匯豐 - 環球債券", "trustee": "匯豐 HSBC", "cat": "債券基金", "nav": 10.55, "exp": "BOND", "fer": 1.15, "size": 9500},
-            {"code": "AIA001", "name": "友邦 - 美洲基金", "trustee": "友邦 AIA", "cat": "北美股票", "nav": 25.30, "exp": "US", "fer": 1.65, "size": 11000},
-            {"code": "AIA002", "name": "友邦 - 強積金保守", "trustee": "友邦 AIA", "cat": "保守基金", "nav": 11.20, "exp": "CASH", "fer": 0.85, "size": 18000},
+        # 模擬從 AASTOCKS 或 MPFA 抓取到的「未清洗原始數據」
+        raw_market_data = [
+            {"name": "宏利MPF核心累積基金", "prov": "宏利 Manulife", "raw_cat": "混合資產", "nav": 15.42, "src": "AASTOCKS"},
+            {"name": "宏利MPF北美股票基金", "prov": "宏利 Manulife", "raw_cat": "北美", "nav": 22.00, "src": "AASTOCKS"},
+            {"name": "宏利MPF中華威力基金", "prov": "宏利 Manulife", "raw_cat": "大中華", "nav": 18.20, "src": "MPFA"},
+            {"name": "中銀保誠平穩基金", "prov": "中銀保誠 BOC-PT", "raw_cat": "平衡", "nav": 14.80, "src": "AASTOCKS"},
+            {"name": "中銀保誠北美指數追蹤", "prov": "中銀保誠 BOC-PT", "raw_cat": "美股", "nav": 28.50, "src": "AASTOCKS"},
+            {"name": "匯豐智選恒指基金", "prov": "匯豐 HSBC", "raw_cat": "中港股票", "nav": 18.55, "src": "AASTOCKS"},
+            {"name": "匯豐智選增長基金", "prov": "匯豐 HSBC", "raw_cat": "80%股票", "nav": 19.10, "src": "MPFA"},
+            {"name": "匯豐智選保證基金", "prov": "匯豐 HSBC", "raw_cat": "保證", "nav": 12.05, "src": "MPFA"},
+            {"name": "友邦強積金保守基金", "prov": "友邦 AIA", "raw_cat": "保守", "nav": 11.20, "src": "AASTOCKS"},
+            {"name": "友邦綠色退休基金", "prov": "友邦 AIA", "raw_cat": "環球", "nav": 16.75, "src": "AASTOCKS"},
         ]
 
-        final_data = []
-        for f in mpf_funds:
-            # 根據大市賦予單日表現
-            if f["exp"] == "US": d_change = sp500_change
-            elif f["exp"] == "HK": d_change = hsi_change
-            elif f["exp"] == "MIXED": d_change = round((sp500_change*0.3) + (hsi_change*0.3), 2)
-            elif f["exp"] == "BOND": d_change = round(random.uniform(-0.1, 0.2), 2)
-            else: d_change = 0.01
+        cleaned_data = []
+        for f in raw_market_data:
+            standard_category = self.map_category(f["raw_cat"])
+            
+            # 根據分類賦予合理嘅單日升跌幅 (模擬真實大市表現)
+            if standard_category == "股票基金":
+                chg = round(random.uniform(0.5, 2.5), 2)
+            elif standard_category == "混合資產基金":
+                chg = round(random.uniform(0.1, 1.2), 2)
+            else:
+                chg = round(random.uniform(-0.05, 0.1), 2)
 
-            # 【DataPro 核心】加入歷史表現推演 (實戰中應接駁歷史數據庫，這裡用邏輯模擬)
-            m1_trend = d_change * 15 + random.uniform(-2, 2)
-            m3_trend = m1_trend * 2.5 + random.uniform(-4, 4)
-            ytd_trend = m3_trend * 1.5 + random.uniform(-5, 5)
-
-            final_data.append({
-                "fund_code": f["code"],
+            # 2. 數據字段嚴格對齊
+            cleaned_data.append({
                 "fund_name": f["name"],
-                "trustee": f["trustee"],
-                "category": f["cat"],
-                "nav": round(f["nav"] * (1 + (d_change/100)), 2),
-                "1d_change": d_change,
-                "1m_change": round(m1_trend, 2),
-                "3m_change": round(m3_trend, 2),
-                "ytd_change": round(ytd_trend, 2),
-                "fer": f["fer"],
-                "fund_size": f["size"]
+                "provider": f["prov"],
+                "category": standard_category,
+                "nav": f["nav"],
+                "daily_chg": chg,
+                "source": f["src"]
             })
             
-        final_data.sort(key=lambda x: x["1d_change"], reverse=True)
-        return final_data
+        return cleaned_data
 
     def export_to_json(self, data: list):
         os.makedirs("output", exist_ok=True)
         with open("output/mpf_master_data.json", 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-        print("[+] DataPro 級數據輸出完成。")
+        print(f"[+] 數據映射成功！共匯出 {len(data)} 隻格式化基金。")
 
 if __name__ == "__main__":
-    engine = RealTimeMPFEngine()
-    engine.export_to_json(engine.build_real_mpf_data())
+    engine = MPFProfessionalEngine()
+    engine.export_to_json(engine.fetch_and_clean_data())
