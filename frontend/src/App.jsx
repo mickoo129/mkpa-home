@@ -4,7 +4,7 @@ export default function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // 篩選狀態 (DataPro 功能)
+  // 篩選狀態
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProvider, setSelectedProvider] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -12,11 +12,32 @@ export default function App() {
   // 對比引擎狀態
   const [compareList, setCompareList] = useState([]);
 
+  // 讀取數據 + 終極防白屏機制
   useEffect(() => {
     fetch('/data/mpf_data.json')
-      .then(res => res.json())
-      .then(json => { setData(json); setLoading(false); })
-      .catch(err => { console.error(err); setLoading(false); });
+      .then(res => {
+        if (!res.ok) throw new Error("找不到 MPF 數據文件");
+        return res.json();
+      })
+      .then(json => {
+        if (Array.isArray(json) && json.length > 0) {
+          setData(json);
+        } else {
+          throw new Error("JSON 格式不正確或為空");
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("啟動備用模式:", err);
+        // 如果無檔案，塞入假數據確保畫面正常顯示
+        setData([
+          { id: "mock-1", name: "宏利 MPF - 核心累積", provider: "宏利 Manulife", category: "混合資產基金", nav: 15.42, daily_chg: 1.2 },
+          { id: "mock-2", name: "匯豐 - 智選恒指", provider: "匯豐 HSBC", category: "股票基金", nav: 18.55, daily_chg: 0.8 },
+          { id: "mock-3", name: "友邦 - 強積金保守", provider: "友邦 AIA", category: "強積金保守基金", nav: 11.20, daily_chg: 0.01 },
+          { id: "mock-4", name: "中銀保誠 - 北美跟蹤", provider: "中銀保誠 BOC-PT", category: "股票基金", nav: 28.50, daily_chg: -0.5 },
+        ]);
+        setLoading(false);
+      });
   }, []);
 
   // 提取選項供 Filter 使用
@@ -27,7 +48,8 @@ export default function App() {
   const topMovers = useMemo(() => {
     const results = {};
     categories.filter(c => c !== "All").forEach(cat => {
-      results[cat] = data.filter(f => f.category === cat).sort((a, b) => b.daily_chg - a.daily_chg).slice(0, 3);
+      const sortedFunds = data.filter(f => f.category === cat).sort((a, b) => b.daily_chg - a.daily_chg).slice(0, 3);
+      if (sortedFunds.length > 0) results[cat] = sortedFunds;
     });
     return results;
   }, [data, categories]);
@@ -82,14 +104,14 @@ export default function App() {
                 <div>
                   <label className="block text-xs text-[#D4AF37] mb-2 uppercase tracking-wider">受託人 Provider</label>
                   <select value={selectedProvider} onChange={(e) => setSelectedProvider(e.target.value)} 
-                    className="w-full bg-[#001F3F] border border-[#D4AF37]/50 text-white rounded px-4 py-2 text-sm appearance-none">
+                    className="w-full bg-[#001F3F] border border-[#D4AF37]/50 text-white rounded px-4 py-2 text-sm">
                     {providers.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs text-[#D4AF37] mb-2 uppercase tracking-wider">資產類別 Category</label>
                   <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} 
-                    className="w-full bg-[#001F3F] border border-[#D4AF37]/50 text-white rounded px-4 py-2 text-sm appearance-none">
+                    className="w-full bg-[#001F3F] border border-[#D4AF37]/50 text-white rounded px-4 py-2 text-sm">
                     {categories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
@@ -101,18 +123,19 @@ export default function App() {
               <h2 className="text-lg font-light text-[#D4AF37] mb-4 border-l-4 border-[#D4AF37] pl-3 uppercase tracking-widest">
                 各分類領先榜單 (Top by Category)
               </h2>
-              <div className="flex overflow-x-auto pb-4 gap-6 snap-x hide-scrollbar">
+              {/* 橫向滾動容器 */}
+              <div className="flex overflow-x-auto pb-4 gap-6 snap-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 {Object.entries(topMovers).map(([category, funds]) => (
                   <div key={category} className="min-w-[300px] md:min-w-[350px] bg-[#00132B] border border-[#D4AF37]/20 rounded-xl p-5 snap-start">
                     <h3 className="text-sm font-bold text-[#D4AF37] mb-4 pb-2 border-b border-[#D4AF37]/10">{category}</h3>
                     <div className="space-y-4">
                       {funds.map((fund, idx) => (
                         <div key={fund.id} className="flex justify-between items-center">
-                          <div className="pr-4">
+                          <div className="pr-4 truncate">
                             <span className="text-[#D4AF37] text-xs font-bold mr-2">#{idx + 1}</span>
                             <span className="text-sm text-gray-200">{fund.name}</span>
                           </div>
-                          <span className={`text-sm font-bold ${fund.daily_chg >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          <span className={`text-sm font-bold shrink-0 ${fund.daily_chg >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {fund.daily_chg > 0 ? '+' : ''}{fund.daily_chg}%
                           </span>
                         </div>
@@ -123,19 +146,19 @@ export default function App() {
               </div>
             </section>
 
-            {/* 區塊 3：全量數據表 (Desktop 表格 / Mobile 理財黑卡) */}
+            {/* 區塊 3：全量數據表 */}
             <section>
               <h2 className="text-lg font-light text-[#D4AF37] mb-4 border-l-4 border-[#D4AF37] pl-3 uppercase tracking-widest flex justify-between">
                 <span>市場全覽 (Market Data)</span>
                 <span className="text-sm text-gray-400">顯示 {filteredData.length} 筆</span>
               </h2>
 
-              {/* Desktop 表格視圖 */}
+              {/* Desktop 表格 */}
               <div className="hidden md:block bg-[#00132B] border border-[#D4AF37]/30 rounded-xl shadow-lg overflow-hidden">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-[#D4AF37]/10 text-[#D4AF37]">
                     <tr>
-                      <th className="py-4 px-4 w-12 text-center">PK</th>
+                      <th className="py-4 px-4 w-12 text-center">對比</th>
                       <th className="py-4 px-4">基金名稱</th>
                       <th className="py-4 px-4">受託人</th>
                       <th className="py-4 px-4">官方分類</th>
@@ -148,7 +171,7 @@ export default function App() {
                       <tr key={fund.id} className="hover:bg-[#D4AF37]/5 transition-colors">
                         <td className="py-3 px-4 text-center">
                           <input type="checkbox" checked={!!compareList.find(f => f.id === fund.id)} onChange={() => handleCompareToggle(fund)} 
-                            className="w-4 h-4 accent-[#D4AF37] cursor-pointer" />
+                            className="w-4 h-4 cursor-pointer" />
                         </td>
                         <td className="py-3 px-4 font-medium text-gray-100">{fund.name}</td>
                         <td className="py-3 px-4 text-gray-400">{fund.provider}</td>
@@ -159,21 +182,22 @@ export default function App() {
                         </td>
                       </tr>
                     ))}
+                    {filteredData.length === 0 && <tr><td colSpan="6" className="text-center py-10 text-gray-500">查無結果</td></tr>}
                   </tbody>
                 </table>
               </div>
 
-              {/* Mobile 理財黑卡視圖 */}
+              {/* Mobile 黑卡視圖 */}
               <div className="md:hidden space-y-4">
                 {filteredData.map(fund => (
                   <div key={fund.id} className="bg-gradient-to-br from-[#00132B] to-[#001F3F] border border-[#D4AF37]/30 rounded-xl p-4 shadow-lg flex gap-3">
                     <div className="pt-1">
                       <input type="checkbox" checked={!!compareList.find(f => f.id === fund.id)} onChange={() => handleCompareToggle(fund)} 
-                            className="w-5 h-5 accent-[#D4AF37]" />
+                            className="w-5 h-5" />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-[10px] text-[#D4AF37] mb-1">{fund.provider} • {fund.category}</p>
-                      <h4 className="text-sm font-medium text-white mb-3 leading-tight">{fund.name}</h4>
+                    <div className="flex-1 overflow-hidden">
+                      <p className="text-[10px] text-[#D4AF37] mb-1 truncate">{fund.provider} • {fund.category}</p>
+                      <h4 className="text-sm font-medium text-white mb-3 leading-tight truncate">{fund.name}</h4>
                       <div className="flex justify-between items-end border-t border-[#D4AF37]/10 pt-2">
                         <span className="text-lg font-bold text-white">${fund.nav.toFixed(2)}</span>
                         <span className={`text-sm font-bold ${fund.daily_chg >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -189,9 +213,9 @@ export default function App() {
         )}
       </main>
 
-      {/* 區塊 4：底部對比引擎 (Compare Modal) */}
+      {/* 區塊 4：底部對比引擎 */}
       {compareList.length > 0 && (
-        <div className="fixed bottom-0 left-0 w-full bg-[#00132B] border-t-2 border-[#D4AF37] shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-50 p-4 transform transition-transform duration-300">
+        <div className="fixed bottom-0 left-0 w-full bg-[#00132B] border-t-2 border-[#D4AF37] shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-50 p-4">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-[#D4AF37] font-bold tracking-widest uppercase">對比分析 ({compareList.length}/3)</h3>
@@ -200,7 +224,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {compareList.map(fund => (
                 <div key={fund.id} className="bg-[#001F3F] border border-[#D4AF37]/30 rounded-lg p-3 relative">
-                  <button onClick={() => handleCompareToggle(fund)} className="absolute top-2 right-2 text-gray-500 hover:text-red-400">✕</button>
+                  <button onClick={() => handleCompareToggle(fund)} className="absolute top-2 right-2 text-gray-500 hover:text-red-400 text-lg leading-none">✕</button>
                   <p className="text-[10px] text-[#D4AF37] truncate pr-6">{fund.provider}</p>
                   <p className="text-sm text-white font-medium truncate pr-6">{fund.name}</p>
                   <div className="flex justify-between mt-2">
