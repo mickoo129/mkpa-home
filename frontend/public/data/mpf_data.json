@@ -1,0 +1,29 @@
+[
+    {
+        "fund_code": "MAN001",
+        "fund_name": "Manulife MPF Core - HK Equity",
+        "category": "Other / Unclassified",
+        "last_updated": "2026-04-10 10:06:43",
+        "nav": 15.42,
+        "1d_change": 1.2,
+        "data_source": "Real-time"
+    },
+    {
+        "fund_code": "BOC002",
+        "fund_name": "BOC-Prudential North America",
+        "category": "Other / Unclassified",
+        "last_updated": "2026-04-10 10:06:43",
+        "nav": 22.1,
+        "1d_change": -0.5,
+        "data_source": "Real-time"
+    },
+    {
+        "fund_code": "HSB003",
+        "fund_name": "HSBC ValueChoice Balanced",
+        "category": "Mixed Assets Fund",
+        "last_updated": "2026-04-10 10:06:43",
+        "nav": 18.55,
+        "1d_change": 0.0,
+        "data_source": "Monthly Sync"
+    }
+]
