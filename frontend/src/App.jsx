@@ -4,15 +4,11 @@ export default function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // 篩選狀態
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProvider, setSelectedProvider] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  
-  // 對比引擎狀態
   const [compareList, setCompareList] = useState([]);
 
-  // 讀取數據 + 終極防白屏機制
   useEffect(() => {
     fetch('/data/mpf_data.json')
       .then(res => {
@@ -21,7 +17,16 @@ export default function App() {
       })
       .then(json => {
         if (Array.isArray(json) && json.length > 0) {
-          setData(json);
+          // 防彈裝甲：統一格式化數據，兼容新舊版 JSON
+          const safeData = json.map((f, index) => ({
+            id: f.id || f.fund_code || `temp-${index}`,
+            name: f.name || f.fund_name || "未知基金",
+            provider: f.provider || f.trustee || "未知受託人",
+            category: f.category || "未分類",
+            nav: typeof f.nav === 'number' ? f.nav : 0,
+            daily_chg: typeof f.daily_chg === 'number' ? f.daily_chg : (f['1d_change'] || 0)
+          }));
+          setData(safeData);
         } else {
           throw new Error("JSON 格式不正確或為空");
         }
@@ -29,22 +34,17 @@ export default function App() {
       })
       .catch(err => {
         console.error("啟動備用模式:", err);
-        // 如果無檔案，塞入假數據確保畫面正常顯示
         setData([
-          { id: "mock-1", name: "宏利 MPF - 核心累積", provider: "宏利 Manulife", category: "混合資產基金", nav: 15.42, daily_chg: 1.2 },
-          { id: "mock-2", name: "匯豐 - 智選恒指", provider: "匯豐 HSBC", category: "股票基金", nav: 18.55, daily_chg: 0.8 },
-          { id: "mock-3", name: "友邦 - 強積金保守", provider: "友邦 AIA", category: "強積金保守基金", nav: 11.20, daily_chg: 0.01 },
-          { id: "mock-4", name: "中銀保誠 - 北美跟蹤", provider: "中銀保誠 BOC-PT", category: "股票基金", nav: 28.50, daily_chg: -0.5 },
+          { id: "m1", name: "宏利 MPF - 核心累積", provider: "宏利 Manulife", category: "混合資產基金", nav: 15.42, daily_chg: 1.2 },
+          { id: "m2", name: "匯豐 - 智選恒指", provider: "匯豐 HSBC", category: "股票基金", nav: 18.55, daily_chg: 0.8 },
         ]);
         setLoading(false);
       });
   }, []);
 
-  // 提取選項供 Filter 使用
   const providers = ["All", ...new Set(data.map(f => f.provider))];
   const categories = ["All", ...new Set(data.map(f => f.category))];
 
-  // 龍虎榜 2.0 (按分類提取 Top 3)
   const topMovers = useMemo(() => {
     const results = {};
     categories.filter(c => c !== "All").forEach(cat => {
@@ -54,15 +54,19 @@ export default function App() {
     return results;
   }, [data, categories]);
 
-  // 表格過濾邏輯
   const filteredData = data.filter(f => {
-    const matchSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase()) || f.provider.toLowerCase().includes(searchTerm.toLowerCase());
+    // 加咗防護，確保 name 同 provider 唔會係 undefined
+    const safeName = f.name || "";
+    const safeProvider = f.provider || "";
+    const searchLower = searchTerm.toLowerCase();
+    
+    const matchSearch = safeName.toLowerCase().includes(searchLower) || safeProvider.toLowerCase().includes(searchLower);
     const matchProvider = selectedProvider === "All" || f.provider === selectedProvider;
     const matchCategory = selectedCategory === "All" || f.category === selectedCategory;
+    
     return matchSearch && matchProvider && matchCategory;
   });
 
-  // 處理 Checkbox 對比勾選
   const handleCompareToggle = (fund) => {
     if (compareList.find(f => f.id === fund.id)) {
       setCompareList(compareList.filter(f => f.id !== fund.id));
@@ -74,8 +78,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#001F3F] text-white font-sans selection:bg-[#D4AF37] selection:text-[#001F3F] pb-32">
-      
-      {/* 導航欄 */}
       <header className="sticky top-0 z-40 bg-[#001F3F] border-b border-[#D4AF37]/40 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -93,7 +95,6 @@ export default function App() {
           <div className="text-center text-[#D4AF37] py-20 animate-pulse text-lg tracking-widest">初始化 DataPro 終端機...</div>
         ) : (
           <>
-            {/* 區塊 1：DataPro 頂部篩選菜單 */}
             <section className="bg-[#00132B] border border-[#D4AF37]/30 rounded-xl p-5 shadow-lg">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -118,12 +119,10 @@ export default function App() {
               </div>
             </section>
 
-            {/* 區塊 2：龍虎榜 2.0 (橫向滾動) */}
             <section>
               <h2 className="text-lg font-light text-[#D4AF37] mb-4 border-l-4 border-[#D4AF37] pl-3 uppercase tracking-widest">
                 各分類領先榜單 (Top by Category)
               </h2>
-              {/* 橫向滾動容器 */}
               <div className="flex overflow-x-auto pb-4 gap-6 snap-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 {Object.entries(topMovers).map(([category, funds]) => (
                   <div key={category} className="min-w-[300px] md:min-w-[350px] bg-[#00132B] border border-[#D4AF37]/20 rounded-xl p-5 snap-start">
@@ -146,14 +145,12 @@ export default function App() {
               </div>
             </section>
 
-            {/* 區塊 3：全量數據表 */}
             <section>
               <h2 className="text-lg font-light text-[#D4AF37] mb-4 border-l-4 border-[#D4AF37] pl-3 uppercase tracking-widest flex justify-between">
                 <span>市場全覽 (Market Data)</span>
                 <span className="text-sm text-gray-400">顯示 {filteredData.length} 筆</span>
               </h2>
 
-              {/* Desktop 表格 */}
               <div className="hidden md:block bg-[#00132B] border border-[#D4AF37]/30 rounded-xl shadow-lg overflow-hidden">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-[#D4AF37]/10 text-[#D4AF37]">
@@ -182,12 +179,10 @@ export default function App() {
                         </td>
                       </tr>
                     ))}
-                    {filteredData.length === 0 && <tr><td colSpan="6" className="text-center py-10 text-gray-500">查無結果</td></tr>}
                   </tbody>
                 </table>
               </div>
 
-              {/* Mobile 黑卡視圖 */}
               <div className="md:hidden space-y-4">
                 {filteredData.map(fund => (
                   <div key={fund.id} className="bg-gradient-to-br from-[#00132B] to-[#001F3F] border border-[#D4AF37]/30 rounded-xl p-4 shadow-lg flex gap-3">
@@ -213,7 +208,6 @@ export default function App() {
         )}
       </main>
 
-      {/* 區塊 4：底部對比引擎 */}
       {compareList.length > 0 && (
         <div className="fixed bottom-0 left-0 w-full bg-[#00132B] border-t-2 border-[#D4AF37] shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-50 p-4">
           <div className="max-w-7xl mx-auto">
