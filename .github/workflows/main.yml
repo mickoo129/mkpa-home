@@ -1,8 +1,10 @@
 name: MPF Auto-Pilot Engine
 
 on:
+  # 每天香港時間 20:30 (UTC 12:30) 執行爬蟲
   schedule:
     - cron: '30 12 * * *'
+  # 允許手動測試觸發
   workflow_dispatch:
 
 permissions:
@@ -21,7 +23,6 @@ jobs:
         with:
           python-version: '3.9'
 
-      # 【終極強制安裝指令】直接話畀機器知要裝咩，唔使再靠 requirements.txt
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -31,6 +32,7 @@ jobs:
         run: |
           cd data-engine
           python scraper.py
+          # 確保前端 public 目錄存在並移動 JSON
           mkdir -p ../frontend/public/data
           cp output/mpf_master_data.json ../frontend/public/data/mpf_data.json
 
@@ -39,8 +41,10 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "MPF Auto-Pilot Bot"
           git add frontend/public/data/mpf_data.json
+          
+          # 偵測檔案是否有變更，有變更才 Push，避免報錯
           if ! git diff-index --quiet HEAD; then
-            git commit -m "🤖 Auto-Sync: Update MPF Data"
+            git commit -m "🤖 Auto-Sync: Update MPF Data (HKT 20:30)"
             git push origin main
           else
             echo "No data changes to commit."
