@@ -1,58 +1,82 @@
 [
     {
-        "fund_code": "BOC001",
-        "fund_name": "中銀保誠 - 香港股票",
-        "category": "香港股票",
-        "nav": 14.88,
-        "1d_change": 0.55,
-        "data_source": "Real-time"
+        "fund_name": "宏利MPF核心累積基金",
+        "provider": "宏利 Manulife",
+        "category": "混合資產基金",
+        "nav": 15.42,
+        "daily_chg": 0.44,
+        "source": "AASTOCKS"
     },
     {
-        "fund_code": "HSB001",
-        "fund_name": "匯豐 - 智選恒指",
-        "category": "香港股票",
-        "nav": 18.65,
-        "1d_change": 0.55,
-        "data_source": "Real-time"
+        "fund_name": "宏利MPF北美股票基金",
+        "provider": "宏利 Manulife",
+        "category": "股票基金",
+        "nav": 22.0,
+        "daily_chg": 1.27,
+        "source": "AASTOCKS"
     },
     {
-        "fund_code": "MAN001",
-        "fund_name": "宏利 MPF - 核心累積",
-        "category": "混合資產",
-        "nav": 15.45,
-        "1d_change": 0.22,
-        "data_source": "Real-time"
+        "fund_name": "宏利MPF中華威力基金",
+        "provider": "宏利 Manulife",
+        "category": "股票基金",
+        "nav": 18.2,
+        "daily_chg": 2.29,
+        "source": "MPFA"
     },
     {
-        "fund_code": "MAN002",
-        "fund_name": "宏利 MPF - 北美股票",
-        "category": "北美股票",
-        "nav": 22.04,
-        "1d_change": 0.18,
-        "data_source": "Real-time"
+        "fund_name": "中銀保誠平穩基金",
+        "provider": "中銀保誠 BOC-PT",
+        "category": "混合資產基金",
+        "nav": 14.8,
+        "daily_chg": 1.05,
+        "source": "AASTOCKS"
     },
     {
-        "fund_code": "BOC002",
-        "fund_name": "中銀保誠 - 北美跟蹤",
-        "category": "北美股票",
-        "nav": 28.55,
-        "1d_change": 0.18,
-        "data_source": "Real-time"
+        "fund_name": "中銀保誠北美指數追蹤",
+        "provider": "中銀保誠 BOC-PT",
+        "category": "股票基金",
+        "nav": 28.5,
+        "daily_chg": 1.06,
+        "source": "AASTOCKS"
     },
     {
-        "fund_code": "AIA001",
-        "fund_name": "友邦 - 美洲基金",
-        "category": "北美股票",
-        "nav": 25.35,
-        "1d_change": 0.18,
-        "data_source": "Real-time"
+        "fund_name": "匯豐智選恒指基金",
+        "provider": "匯豐 HSBC",
+        "category": "股票基金",
+        "nav": 18.55,
+        "daily_chg": 1.94,
+        "source": "AASTOCKS"
     },
     {
-        "fund_code": "AIA002",
-        "fund_name": "友邦 - 強積金保守",
-        "category": "保守基金",
+        "fund_name": "匯豐智選增長基金",
+        "provider": "匯豐 HSBC",
+        "category": "股票基金",
+        "nav": 19.1,
+        "daily_chg": 1.18,
+        "source": "MPFA"
+    },
+    {
+        "fund_name": "匯豐智選保證基金",
+        "provider": "匯豐 HSBC",
+        "category": "保守/保證基金",
+        "nav": 12.05,
+        "daily_chg": -0.05,
+        "source": "MPFA"
+    },
+    {
+        "fund_name": "友邦強積金保守基金",
+        "provider": "友邦 AIA",
+        "category": "保守/保證基金",
         "nav": 11.2,
-        "1d_change": 0.01,
-        "data_source": "Real-time"
+        "daily_chg": 0.01,
+        "source": "AASTOCKS"
+    },
+    {
+        "fund_name": "友邦綠色退休基金",
+        "provider": "友邦 AIA",
+        "category": "股票基金",
+        "nav": 16.75,
+        "daily_chg": 0.99,
+        "source": "AASTOCKS"
     }
 ]
