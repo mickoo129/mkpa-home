@@ -1,29 +1,58 @@
 [
     {
+        "fund_code": "BOC001",
+        "fund_name": "中銀保誠 - 香港股票",
+        "category": "香港股票",
+        "nav": 14.88,
+        "1d_change": 0.55,
+        "data_source": "Real-time"
+    },
+    {
+        "fund_code": "HSB001",
+        "fund_name": "匯豐 - 智選恒指",
+        "category": "香港股票",
+        "nav": 18.65,
+        "1d_change": 0.55,
+        "data_source": "Real-time"
+    },
+    {
         "fund_code": "MAN001",
-        "fund_name": "Manulife MPF Core - HK Equity",
-        "category": "Other / Unclassified",
-        "last_updated": "2026-04-10 13:54:26",
-        "nav": 15.42,
-        "1d_change": 1.2,
+        "fund_name": "宏利 MPF - 核心累積",
+        "category": "混合資產",
+        "nav": 15.45,
+        "1d_change": 0.22,
+        "data_source": "Real-time"
+    },
+    {
+        "fund_code": "MAN002",
+        "fund_name": "宏利 MPF - 北美股票",
+        "category": "北美股票",
+        "nav": 22.04,
+        "1d_change": 0.18,
         "data_source": "Real-time"
     },
     {
         "fund_code": "BOC002",
-        "fund_name": "BOC-Prudential North America",
-        "category": "Other / Unclassified",
-        "last_updated": "2026-04-10 13:54:26",
-        "nav": 22.1,
-        "1d_change": -0.5,
+        "fund_name": "中銀保誠 - 北美跟蹤",
+        "category": "北美股票",
+        "nav": 28.55,
+        "1d_change": 0.18,
         "data_source": "Real-time"
     },
     {
-        "fund_code": "HSB003",
-        "fund_name": "HSBC ValueChoice Balanced",
-        "category": "Mixed Assets Fund",
-        "last_updated": "2026-04-10 13:54:26",
-        "nav": 18.55,
-        "1d_change": 0.0,
-        "data_source": "Monthly Sync"
+        "fund_code": "AIA001",
+        "fund_name": "友邦 - 美洲基金",
+        "category": "北美股票",
+        "nav": 25.35,
+        "1d_change": 0.18,
+        "data_source": "Real-time"
+    },
+    {
+        "fund_code": "AIA002",
+        "fund_name": "友邦 - 強積金保守",
+        "category": "保守基金",
+        "nav": 11.2,
+        "1d_change": 0.01,
+        "data_source": "Real-time"
     }
 ]
