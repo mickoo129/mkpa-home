@@ -1,163 +1,121 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 const Dashboard = ({ data = [] }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTrustee, setSelectedTrustee] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortConfig, setSortConfig] = useState({ key: '1d_change', direction: 'desc' });
 
-  // 輔助函數：從代碼中推斷受託人 (若後端無傳遞此欄位時的容錯機制)
-  const getTrustee = (code) => {
-    if (code.startsWith('MAN')) return '宏利 Manulife';
-    if (code.startsWith('BOC')) return '中銀保誠 BOC-Prudential';
-    if (code.startsWith('HSB')) return '匯豐 HSBC';
-    if (code.startsWith('AIA')) return '友邦 AIA';
-    return '其他受託人';
+  // 提取唯一選項供 Filter 使用
+  const trustees = ["All", ...new Set(data.map(item => item.trustee))];
+  const categories = ["All", ...new Set(data.map(item => item.category))];
+
+  // 排序與篩選邏輯 (DataPro 核心體驗)
+  const processedData = useMemo(() => {
+    let filtered = data.filter(fund => {
+      const matchSearch = fund.fund_name?.toLowerCase().includes(searchTerm.toLowerCase()) || fund.fund_code?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchTrustee = selectedTrustee === "All" || fund.trustee === selectedTrustee;
+      const matchCategory = selectedCategory === "All" || fund.category === selectedCategory;
+      return matchSearch && matchTrustee && matchCategory;
+    });
+
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        const aVal = a[sortConfig.key];
+        const bVal = b[sortConfig.key];
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return filtered;
+  }, [data, searchTerm, selectedTrustee, selectedCategory, sortConfig]);
+
+  // 處理點擊表頭排序
+  const requestSort = (key) => {
+    let direction = 'desc';
+    if (sortConfig.key === key && sortConfig.direction === 'desc') direction = 'asc';
+    setSortConfig({ key, direction });
   };
 
-  // 搜尋過濾
-  const filteredData = data.filter(fund => 
-    fund.fund_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fund.fund_code?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return " ↕";
+    return sortConfig.direction === 'asc' ? " ↑" : " ↓";
+  };
 
-  // 龍虎榜：當日表現前 3 名
-  const topFunds = [...data].sort((a, b) => (b['1d_change'] || 0) - (a['1d_change'] || 0)).slice(0, 3);
+  // 顏色輔助函數
+  const colorText = (val) => val > 0 ? "text-green-400" : val < 0 ? "text-red-400" : "text-gray-400";
 
   return (
-    <div className="space-y-12 bg-[#001F3F] min-h-screen text-white">
+    <div className="space-y-8 bg-[#001F3F] text-white">
       
-      {/* 搜尋列區塊 (私人銀行風格) */}
-      <div className="relative max-w-md mx-auto md:mx-0">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <svg className="h-5 w-5 text-[#D4AF37]/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        <input 
-          type="text" 
-          placeholder="搜尋基金名稱或受託人..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-[#00132B] border-b-2 border-[#D4AF37]/50 text-white py-3 pl-12 pr-4 focus:outline-none focus:border-[#D4AF37] transition-colors placeholder-gray-400 font-light"
-        />
-      </div>
-
-      {/* 區塊 1: 龍虎榜 (Top Movers) - 帶有香檳金發光效果 */}
-      <section>
-        <h2 className="text-xl font-light text-[#D4AF37] mb-6 flex items-center gap-2 uppercase tracking-widest border-l-4 border-[#D4AF37] pl-3">
-          Top Movers 今日龍虎榜
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {topFunds.map((fund, index) => (
-            <div 
-              key={fund.fund_code} 
-              className="relative overflow-hidden rounded-lg p-6 bg-gradient-to-br from-[#00132B] to-[#001F3F] border border-[#D4AF37]/40 shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:shadow-[0_0_25px_rgba(212,175,55,0.3)] transition-all duration-300"
-            >
-              <div className="absolute -top-4 -right-2 text-6xl text-[#D4AF37]/10 font-serif italic font-bold">
-                {index + 1}
-              </div>
-              <p className="text-xs text-[#D4AF37]/80 mb-2 uppercase tracking-wider">{getTrustee(fund.fund_code)}</p>
-              <h3 className="text-lg font-medium text-white leading-tight mb-6 pr-6 h-12">{fund.fund_name}</h3>
-              
-              <div className="flex justify-between items-end">
-                <div>
-                  <p className="text-xs text-gray-400 font-light mb-1">最新 NAV</p>
-                  <p className="text-2xl font-semibold text-[#D4AF37]">${fund.nav?.toFixed(2) || '0.00'}</p>
-                </div>
-                <div className={`px-4 py-1.5 rounded-sm text-sm font-medium ${fund['1d_change'] >= 0 ? 'bg-green-500/10 text-green-400 border border-green-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}>
-                  {fund['1d_change'] > 0 ? '+' : ''}{fund['1d_change']}%
-                </div>
-              </div>
-            </div>
-          ))}
+      {/* 數據篩選區 (Filter Bar) */}
+      <section className="bg-[#00132B] border border-[#D4AF37]/30 rounded-xl p-5 shadow-lg">
+        <div className="flex flex-col md:flex-row gap-4 items-end">
+          <div className="w-full md:w-1/3">
+            <label className="block text-xs text-[#D4AF37] mb-1">搜尋名稱/代碼</label>
+            <input 
+              type="text" placeholder="e.g. 宏利, US..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[#001F3F] border border-[#D4AF37]/50 text-white rounded px-3 py-2 focus:outline-none focus:border-[#D4AF37]"
+            />
+          </div>
+          <div className="w-full md:w-1/3">
+            <label className="block text-xs text-[#D4AF37] mb-1">過濾受託人 (Trustee)</label>
+            <select value={selectedTrustee} onChange={(e) => setSelectedTrustee(e.target.value)} className="w-full bg-[#001F3F] border border-[#D4AF37]/50 text-white rounded px-3 py-2">
+              {trustees.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div className="w-full md:w-1/3">
+            <label className="block text-xs text-[#D4AF37] mb-1">過濾資產類別 (Category)</label>
+            <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="w-full bg-[#001F3F] border border-[#D4AF37]/50 text-white rounded px-3 py-2">
+              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
         </div>
       </section>
 
-      {/* 區塊 2: 受託人 PK 表格 (Market Data) */}
-      <section>
-        <h2 className="text-xl font-light text-[#D4AF37] mb-6 flex items-center gap-2 uppercase tracking-widest border-l-4 border-[#D4AF37] pl-3">
-          Market Data 市場全覽
-        </h2>
-        
-        {/* 電腦端：經典優雅表格 (大於 md 顯示) */}
-        <div className="hidden md:block bg-[#00132B] border border-[#D4AF37]/30 rounded-lg shadow-lg">
-          <table className="w-full text-left border-collapse">
+      {/* 專業數據表 (DataPro 寬表模式) */}
+      <section className="bg-[#00132B] border border-[#D4AF37]/30 rounded-xl shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse whitespace-nowrap min-w-[1000px]">
             <thead>
-              <tr className="border-b border-[#D4AF37]/40 bg-[#D4AF37]/5 text-[#D4AF37] text-sm uppercase tracking-wider">
-                <th className="py-4 px-6 font-medium">基金名稱</th>
-                <th className="py-4 px-6 font-medium">受託人</th>
-                <th className="py-4 px-6 font-medium text-right">最新價格 (HKD)</th>
-                <th className="py-4 px-6 font-medium text-center">數據狀態</th>
+              <tr className="border-b-2 border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] text-xs uppercase tracking-wider cursor-pointer">
+                <th className="py-4 px-4 sticky left-0 bg-[#00132B] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.5)]" onClick={() => requestSort('fund_name')}>基金名稱 {getSortIcon('fund_name')}</th>
+                <th className="py-4 px-4" onClick={() => requestSort('category')}>資產類別 {getSortIcon('category')}</th>
+                <th className="py-4 px-4 text-right" onClick={() => requestSort('nav')}>最新 NAV {getSortIcon('nav')}</th>
+                <th className="py-4 px-4 text-right" onClick={() => requestSort('1d_change')}>1日 {getSortIcon('1d_change')}</th>
+                <th className="py-4 px-4 text-right" onClick={() => requestSort('1m_change')}>1個月 {getSortIcon('1m_change')}</th>
+                <th className="py-4 px-4 text-right" onClick={() => requestSort('3m_change')}>3個月 {getSortIcon('3m_change')}</th>
+                <th className="py-4 px-4 text-right" onClick={() => requestSort('ytd_change')}>YTD {getSortIcon('ytd_change')}</th>
+                <th className="py-4 px-4 text-right text-gray-400" onClick={() => requestSort('fer')}>FER(%) {getSortIcon('fer')}</th>
+                <th className="py-4 px-4 text-right text-gray-400" onClick={() => requestSort('fund_size')}>規模(百萬) {getSortIcon('fund_size')}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#D4AF37]/10">
-              {filteredData.map((fund) => (
-                <tr key={fund.fund_code} className="hover:bg-[#D4AF37]/5 transition-colors">
-                  <td className="py-4 px-6">
+            <tbody className="divide-y divide-[#D4AF37]/10 text-sm">
+              {processedData.length > 0 ? processedData.map((fund) => (
+                <tr key={fund.fund_code} className="hover:bg-[#D4AF37]/5 transition-colors group">
+                  {/* Sticky 鎖定左側基金名稱，方便手機水平滑動查看數據 */}
+                  <td className="py-3 px-4 sticky left-0 bg-[#00132B] group-hover:bg-[#061e38] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.5)]">
                     <p className="font-medium text-gray-100">{fund.fund_name}</p>
-                    <p className="text-xs text-gray-500">{fund.category}</p>
+                    <p className="text-[10px] text-gray-500">{fund.trustee} | {fund.fund_code}</p>
                   </td>
-                  <td className="py-4 px-6 text-sm text-gray-300">{getTrustee(fund.fund_code)}</td>
-                  <td className="py-4 px-6 text-right">
-                    <p className="font-bold text-[#D4AF37]">${fund.nav?.toFixed(2)}</p>
-                    <p className={`text-xs ${fund['1d_change'] >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {fund['1d_change'] > 0 ? '+' : ''}{fund['1d_change']}%
-                    </p>
-                  </td>
-                  <td className="py-4 px-6 text-center">
-                    {fund.data_source === 'Real-time' ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-yellow-900/40 text-yellow-300 border border-yellow-500/50 shadow-[0_0_8px_rgba(234,179,8,0.2)]">
-                        ⚡ Real-time
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-900/40 text-blue-300 border border-blue-500/50">
-                        📅 Monthly Sync
-                      </span>
-                    )}
-                  </td>
+                  <td className="py-3 px-4 text-gray-300">{fund.category}</td>
+                  <td className="py-3 px-4 text-right font-semibold">${fund.nav?.toFixed(2)}</td>
+                  <td className={`py-3 px-4 text-right font-medium ${colorText(fund['1d_change'])}`}>{fund['1d_change'] > 0 ? '+' : ''}{fund['1d_change']}%</td>
+                  <td className={`py-3 px-4 text-right font-medium ${colorText(fund['1m_change'])}`}>{fund['1m_change'] > 0 ? '+' : ''}{fund['1m_change']}%</td>
+                  <td className={`py-3 px-4 text-right font-medium ${colorText(fund['3m_change'])}`}>{fund['3m_change'] > 0 ? '+' : ''}{fund['3m_change']}%</td>
+                  <td className={`py-3 px-4 text-right font-bold ${colorText(fund['ytd_change'])}`}>{fund['ytd_change'] > 0 ? '+' : ''}{fund['ytd_change']}%</td>
+                  <td className="py-3 px-4 text-right text-gray-400">{fund.fer}%</td>
+                  <td className="py-3 px-4 text-right text-gray-400">${fund.fund_size}M</td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan="9" className="py-12 text-center text-gray-500 font-light">找不到符合條件的基金</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-
-        {/* 手機端：黑卡式堆疊佈局 (小於 md 顯示) */}
-        <div className="md:hidden space-y-4">
-          {filteredData.map((fund) => (
-            <div key={fund.fund_code} className="bg-[#00132B] border border-[#D4AF37]/20 rounded-lg p-4 shadow-md relative">
-              <div className="flex justify-between items-start mb-3">
-                <div className="pr-2">
-                  <p className="text-xs text-[#D4AF37]/80 mb-1">{getTrustee(fund.fund_code)}</p>
-                  <p className="font-medium text-gray-100 text-sm leading-snug">{fund.fund_name}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="font-bold text-[#D4AF37]">${fund.nav?.toFixed(2)}</p>
-                  <p className={`text-xs ${fund['1d_change'] >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {fund['1d_change'] > 0 ? '+' : ''}{fund['1d_change']}%
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-between items-center border-t border-[#D4AF37]/10 pt-3 mt-1">
-                <p className="text-xs text-gray-500">{fund.category}</p>
-                <div>
-                  {fund.data_source === 'Real-time' ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-yellow-900/40 text-yellow-300 border border-yellow-500/50">
-                      ⚡ Real-time
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-blue-900/40 text-blue-300 border border-blue-500/50">
-                      📅 Monthly Sync
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredData.length === 0 && (
-          <div className="text-center py-12 text-gray-500 font-light border border-[#D4AF37]/20 rounded-lg bg-[#00132B]/50">
-            查無相符的受託人或基金資料
-          </div>
-        )}
       </section>
 
     </div>
