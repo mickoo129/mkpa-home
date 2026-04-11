@@ -1,8 +1,10 @@
-name: MPF Wealth Terminal Engine
+name: Bank-Grade MPF Data Engine
 
 on:
+  # 每天香港時間 20:30 (UTC 12:30)
   schedule:
     - cron: '30 12 * * *'
+  # 允許手動一鍵更新
   workflow_dispatch:
 
 permissions:
@@ -23,23 +25,23 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install requests beautifulsoup4
+          python -m pip install requests beautifulsoup4 pandas
 
-      - name: Execute Bank-Grade Scraper
+      - name: Run Bank-Grade Engine
         run: |
           cd data-engine
           python scraper.py
           mkdir -p ../frontend/public/data
           cp output/mpf_master_data.json ../frontend/public/data/mpf_data.json
 
-      - name: Deploy to Production
+      - name: Commit and Push to Netlify
         run: |
           git config --local user.email "action@github.com"
-          git config --local user.name "Terminal Bot"
+          git config --local user.name "Bank Grade Bot"
           git add frontend/public/data/mpf_data.json
           
           if ! git diff-index --quiet HEAD; then
-            git commit -m "🚀 Auto-Sync: Terminal Data Update (Cross-Year Verified)"
+            git commit -m "📊 Auto-Sync: Bank Grade Data Update (HKT 20:30)"
             git push origin main
           else
             echo "No data changes to commit."
