@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MKPA 工具箱｜保險、理財及福利實用工具</title>
+<meta name="description" content="MKPA 實用工具一覽：醫保對照、自願醫保保費、理賠數據、醫院指南、強積金、定期息口、長生津及公屋指南。">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#0E5E57">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&family=Noto+Sans+HK:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ===== MKPA 統一標準（由 _standard/mkpa.css 複製，修改請先改呢份再同步到各工具）===== */
+:root{
+  --mk-brand:#00A758; --mk-brand-ink:#00753E; --mk-brand-soft:#E6F6EE; --mk-brand-line:#B4E2C8;
+  --mk-deep:#0E5E57; --mk-ink:#1D2B2A; --mk-muted:#5B6B6A;
+  --mk-bg:#F6F9F8; --mk-surface:#FFFFFF; --mk-line:#E3E9E7;
+  --mk-warn:#8A5B00; --mk-warn-soft:#FFF5DC; --mk-danger:#C62828; --mk-danger-soft:#FDECEC;
+  --mk-sans:"Noto Sans HK","PingFang HK","Microsoft JhengHei",system-ui,sans-serif;
+  --mk-num:"Barlow","Noto Sans HK",system-ui,sans-serif;
+  --mk-max:1320px;                        /* 內容最闊 */
+  --mk-gutter:clamp(16px,3vw,32px);       /* 兩邊留白：手機 16px → 桌面 32px */
+  /* 分類色盤：主色（圓點、色條、圖表）／ -ink 白底寫字 ／ -soft 淺底 */
+  --mk-cat-1:#3072D4; --mk-cat-1-ink:#3072D4; --mk-cat-1-soft:#F1F5FC;   /* 1 醫療／住院 */
+  --mk-cat-2:#D86F35; --mk-cat-2-ink:#B95924; --mk-cat-2-soft:#FCF5F1;   /* 2 人壽／身故 */
+  --mk-cat-3:#953CB3; --mk-cat-3-ink:#953CB3; --mk-cat-3-soft:#F8F1FA;   /* 3 危疾 */
+  --mk-cat-4:#158E92; --mk-cat-4-ink:#138185; --mk-cat-4-soft:#EFF7F7;   /* 4 意外 */
+  --mk-cat-5:#C29323; --mk-cat-5-ink:#926F1B; --mk-cat-5-soft:#FBF7F0;   /* 5 儲蓄／退休／強積金 */
+  --mk-cat-6:#CD486B; --mk-cat-6-ink:#CB4266; --mk-cat-6-soft:#FCF2F5;   /* 6 癌症 */
+  --mk-cat-7:#6F7377; --mk-cat-7-ink:#6F7377; --mk-cat-7-soft:#F5F5F5;   /* 7 中性／其他 */
+  --mk-cat-8:#845C4A; --mk-cat-8-ink:#845C4A; --mk-cat-8-soft:#F6F4F2;   /* 8 後備 */
+}
+/* 分類 class：加喺元素上就用 var(--c) var(--c-ink) var(--c-soft) */
+.mk-cat-1{--c:var(--mk-cat-1);--c-ink:var(--mk-cat-1-ink);--c-soft:var(--mk-cat-1-soft)}
+.mk-cat-2{--c:var(--mk-cat-2);--c-ink:var(--mk-cat-2-ink);--c-soft:var(--mk-cat-2-soft)}
+.mk-cat-3{--c:var(--mk-cat-3);--c-ink:var(--mk-cat-3-ink);--c-soft:var(--mk-cat-3-soft)}
+.mk-cat-4{--c:var(--mk-cat-4);--c-ink:var(--mk-cat-4-ink);--c-soft:var(--mk-cat-4-soft)}
+.mk-cat-5{--c:var(--mk-cat-5);--c-ink:var(--mk-cat-5-ink);--c-soft:var(--mk-cat-5-soft)}
+.mk-cat-6{--c:var(--mk-cat-6);--c-ink:var(--mk-cat-6-ink);--c-soft:var(--mk-cat-6-soft)}
+.mk-cat-7{--c:var(--mk-cat-7);--c-ink:var(--mk-cat-7-ink);--c-soft:var(--mk-cat-7-soft)}
+.mk-cat-8{--c:var(--mk-cat-8);--c-ink:var(--mk-cat-8-ink);--c-soft:var(--mk-cat-8-soft)}
+.mk-chip{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;background:var(--c-soft);color:var(--c-ink);font-size:13px;font-weight:700}
+.mk-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c)}
+/* 版面外框：工具可以用自己嘅 class，但數值要一樣 */
+.mk-wrap{width:100%;max-width:calc(var(--mk-max) + 2 * var(--mk-gutter));margin:0 auto;padding-left:var(--mk-gutter);padding-right:var(--mk-gutter);box-sizing:border-box}
+/* 標題旁 icon */
+.mk-logo{width:32px;height:32px;flex:none;display:block}
+.mk-ecard{display:flex;align-items:center;gap:16px 24px;flex-wrap:wrap;margin:28px 0 0;padding:20px 22px;border-radius:14px;border:1px solid var(--mk-brand-line);background:var(--mk-brand-soft);font-family:var(--mk-sans);color:var(--mk-ink);text-align:left}
+.mk-ecard-txt{flex:1;min-width:200px}
+.mk-ecard-txt b{display:block;font-size:17px;font-weight:700;margin-bottom:2px;color:var(--mk-ink)}
+.mk-ecard-txt span{color:var(--mk-muted);font-size:14.5px;line-height:1.55}
+.mk-ecard-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 22px;border-radius:999px;background:var(--mk-brand);color:#fff!important;font-weight:700;font-size:16px;text-decoration:none!important;white-space:nowrap}
+.mk-ecard-btn:hover{background:var(--mk-brand-ink)}
+.mk-ecard-qr{display:none}
+.mk-copy{margin:14px 0 0;font-size:13px;color:var(--mk-muted);font-family:var(--mk-sans)}
+.mk-print-btn{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--mk-brand);background:var(--mk-surface);color:var(--mk-brand-ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.mk-print-btn:hover{background:var(--mk-brand-soft)}
+.mk-print-head{display:none}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .mk-no-print,.mk-print-btn,.mk-share-btn,.mk-toast,.mk-ecard-btn{display:none!important}
+  .mk-header{position:static}
+  .mk-ecard{break-inside:avoid;padding:10px 14px;margin-top:14px}
+  .mk-ecard-qr{display:block}
+  .mk-ecard-qr svg{width:22mm;height:22mm;display:block}
+  .mk-ecard-txt span:after{content:"（掃描右方二維碼）"}
+  .mk-print-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid var(--mk-brand);padding:0 0 5px;margin:0 0 10px;font-family:var(--mk-sans);color:var(--mk-muted);font-size:9pt}
+  .mk-print-head b{color:var(--mk-deep);font-size:11pt}
+}
+/* 頁頭：統一鎖住喺頂；第一行 icon + 工具名 + 按鈕 */
+.mk-header{position:sticky;top:0;z-index:50}
+.mk-bar{display:flex;align-items:center;gap:12px;min-height:56px}
+.mk-title{display:flex;align-items:center;gap:10px;min-width:0;font-family:var(--mk-sans);font-weight:900;font-size:17px;white-space:nowrap}
+.mk-title span{overflow:hidden;text-overflow:ellipsis}
+/* 工具名 + 細字簡介（兩行都擠喺 56px 頁頭入面） */
+.mk-name{display:flex;flex-direction:column;justify-content:center;min-width:0;line-height:1.2}
+.mk-sub{display:block;margin-top:2px;color:inherit;font-size:12px;font-weight:500;letter-spacing:0;opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+/* 分享呢個方案（同列印按鈕一樣樣式） */
+.mk-share-btn{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--mk-brand);background:var(--mk-surface);color:var(--mk-brand-ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.mk-share-btn:hover{background:var(--mk-brand-soft)}
+.mk-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:999;background:var(--mk-ink);color:#fff;font:600 14px/1.4 var(--mk-sans);padding:10px 16px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.18);max-width:calc(100vw - 32px)}
+.mk-share-btn>.mk-long{margin-left:-6px} /* 抵銷 gap，令「分享呢個方案」連埋 */
+.mk-print-btn>.mk-long{margin-left:-2px} /* 「列印 / 存 PDF」保留一個空格 */
+/* 手機：按鈕字縮短（「分享」「列印」） */
+@media (max-width:480px){.mk-long{display:none}.mk-print-btn,.mk-share-btn{padding:0 10px}}
+/* ===== MKPA 統一標準 完 ===== */
+
+/* ===== 主頁 ===== */
+*{box-sizing:border-box}
+body{margin:0;background:var(--mk-bg);color:var(--mk-ink);font-family:var(--mk-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--mk-brand-ink)}
+.mk-header{background:var(--mk-deep);color:#fff}
+.mk-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px}
+.mk-title{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;min-width:0}
+.mk-name{font-weight:700;font-size:17px}
+.mk-actions{display:flex;gap:8px;flex:none}
+.mk-print-btn{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45)}
+.mk-print-btn:hover{background:rgba(255,255,255,.12)}
+.hero{padding:40px 0 8px}
+.hero h1{margin:0 0 8px;font-size:clamp(26px,4vw,38px);line-height:1.25;color:var(--mk-deep);font-weight:900}
+.hero p{margin:0;color:var(--mk-muted);max-width:720px}
+.search{display:block;margin:22px 0 4px;position:relative;max-width:520px}
+.search input{width:100%;height:48px;border:1px solid var(--mk-line);border-radius:12px;padding:0 16px 0 44px;font:inherit;background:#fff;color:var(--mk-ink)}
+.search input:focus{outline:2px solid var(--mk-brand);outline-offset:1px;border-color:transparent}
+.search svg{position:absolute;left:14px;top:14px;color:var(--mk-muted)}
+.group{margin-top:34px}
+.group h2{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:18px;color:var(--mk-ink)}
+.group h2 i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+.group h2 small{font-weight:500;color:var(--mk-muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.tool{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid var(--mk-line);border-radius:14px;padding:18px 18px 16px;color:var(--mk-ink);text-decoration:none;transition:box-shadow .15s,border-color .15s,transform .15s;break-inside:avoid}
+.tool:hover{border-color:var(--mk-brand);box-shadow:0 6px 18px -10px rgba(14,94,87,.45);transform:translateY(-1px)}
+.tool-top{display:flex;align-items:center;gap:12px}
+.tool img{width:40px;height:40px;border-radius:10px;flex:none;background:var(--mk-brand)}
+.tool b{display:block;font-size:17px;line-height:1.3}
+.tool .sub{display:block;font-size:13px;color:var(--mk-muted)}
+.tool p{margin:0;font-size:14.5px;color:#3C4A49;flex:1}
+.tool .go{font-size:14px;font-weight:700;color:var(--mk-brand-ink)}
+.tool .url{display:none}
+.empty,.err{margin-top:28px;color:var(--mk-muted)}
+footer{margin-top:56px;padding:8px 0 28px;border-top:1px solid var(--mk-line)}
+footer .note{font-size:13px;color:var(--mk-muted);margin:18px 0 0}
+.mk-copy{font-size:13px;color:var(--mk-muted);margin-top:18px}
+@media (max-width:480px){.hero{padding-top:28px}.grid{grid-template-columns:1fr}}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff}
+  .search{display:none}
+  .tool{border-color:#ccc;box-shadow:none;transform:none}
+  .tool .go{display:none}
+  .tool .url{display:block;font-size:9pt;color:#555;word-break:break-all}
+  .grid{grid-template-columns:1fr 1fr;gap:8px}
+  * {-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="mk-print-head"><b>MKPA · 工具箱</b><span>列印日期：<span class="mk-print-date"></span></span></div>
+<header class="mk-header">
+  <div class="mk-wrap mk-bar">
+    <a class="mk-title" href="./"><img class="mk-logo" src="favicon.svg" alt="" width="32" height="32"><span class="mk-name">MKPA 工具箱<small class="mk-sub">保險、理財及福利實用工具</small></span></a>
+    <div class="mk-actions">
+      <button type="button" class="mk-print-btn" onclick="window.print()">列印<span class="mk-long"> / 存 PDF</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="mk-wrap">
+  <section class="hero">
+    <h1>實用工具一覽</h1>
+    <p>保險比較、保費規劃、理賠數據、醫院、強積金、息口，同政府福利指南。全部免費使用，撳入去就用得。</p>
+    <label class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="搜尋工具，例如：醫保、強積金、公屋" aria-label="搜尋工具"></label>
+  </section>
+  <div id="list"><p class="empty">載入緊工具清單…</p></div>
+
+  <footer>
+    <div class="mk-ecard">
+  <div class="mk-ecard-txt"><b>想進一步了解或有疑問？</b><span>歡迎查看我的電子名片，可直接 WhatsApp、加 IG 或儲存聯絡資料。</span></div>
+  <a class="mk-ecard-btn" href="https://api.portfoplus.com/api/v1/adviser/5e41564ab3b1bc00153394db?m=link&amp;r=adviser" target="_blank" rel="noopener">查看電子名片 <span aria-hidden="true">→</span></a>
+  <div class="mk-ecard-qr"><svg viewBox="0 0 41 41" width="90" height="90" shape-rendering="crispEdges" aria-label="電子名片二維碼"><rect width="41" height="41" fill="#fff"/><path d="M2,2h1v1h-1zM3,2h1v1h-1zM4,2h1v1h-1zM5,2h1v1h-1zM6,2h1v1h-1zM7,2h1v1h-1zM8,2h1v1h-1zM11,2h1v1h-1zM16,2h1v1h-1zM19,2h1v1h-1zM20,2h1v1h-1zM21,2h1v1h-1zM22,2h1v1h-1zM25,2h1v1h-1zM28,2h1v1h-1zM32,2h1v1h-1zM33,2h1v1h-1zM34,2h1v1h-1zM35,2h1v1h-1zM36,2h1v1h-1zM37,2h1v1h-1zM38,2h1v1h-1zM2,3h1v1h-1zM8,3h1v1h-1zM11,3h1v1h-1zM15,3h1v1h-1zM16,3h1v1h-1zM18,3h1v1h-1zM19,3h1v1h-1zM22,3h1v1h-1zM24,3h1v1h-1zM28,3h1v1h-1zM29,3h1v1h-1zM32,3h1v1h-1zM38,3h1v1h-1zM2,4h1v1h-1zM4,4h1v1h-1zM5,4h1v1h-1zM6,4h1v1h-1zM8,4h1v1h-1zM10,4h1v1h-1zM14,4h1v1h-1zM22,4h1v1h-1zM23,4h1v1h-1zM24,4h1v1h-1zM25,4h1v1h-1zM29,4h1v1h-1zM32,4h1v1h-1zM34,4h1v1h-1zM35,4h1v1h-1zM36,4h1v1h-1zM38,4h1v1h-1zM2,5h1v1h-1zM4,5h1v1h-1zM5,5h1v1h-1zM6,5h1v1h-1zM8,5h1v1h-1zM10,5h1v1h-1zM11,5h1v1h-1zM14,5h1v1h-1zM18,5h1v1h-1zM19,5h1v1h-1zM21,5h1v1h-1zM24,5h1v1h-1zM25,5h1v1h-1zM26,5h1v1h-1zM27,5h1v1h-1zM28,5h1v1h-1zM29,5h1v1h-1zM30,5h1v1h-1zM32,5h1v1h-1zM34,5h1v1h-1zM35,5h1v1h-1zM36,5h1v1h-1zM38,5h1v1h-1zM2,6h1v1h-1zM4,6h1v1h-1zM5,6h1v1h-1zM6,6h1v1h-1zM8,6h1v1h-1zM10,6h1v1h-1zM11,6h1v1h-1zM16,6h1v1h-1zM17,6h1v1h-1zM20,6h1v1h-1zM21,6h1v1h-1zM25,6h1v1h-1zM30,6h1v1h-1zM32,6h1v1h-1zM34,6h1v1h-1zM35,6h1v1h-1zM36,6h1v1h-1zM38,6h1v1h-1zM2,7h1v1h-1zM8,7h1v1h-1zM10,7h1v1h-1zM12,7h1v1h-1zM14,7h1v1h-1zM20,7h1v1h-1zM22,7h1v1h-1zM23,7h1v1h-1zM24,7h1v1h-1zM29,7h1v1h-1zM32,7h1v1h-1zM38,7h1v1h-1zM2,8h1v1h-1zM3,8h1v1h-1zM4,8h1v1h-1zM5,8h1v1h-1zM6,8h1v1h-1zM7,8h1v1h-1zM8,8h1v1h-1zM10,8h1v1h-1zM12,8h1v1h-1zM14,8h1v1h-1zM16,8h1v1h-1zM18,8h1v1h-1zM20,8h1v1h-1zM22,8h1v1h-1zM24,8h1v1h-1zM26,8h1v1h-1zM28,8h1v1h-1zM30,8h1v1h-1zM32,8h1v1h-1zM33,8h1v1h-1zM34,8h1v1h-1zM35,8h1v1h-1zM36,8h1v1h-1zM37,8h1v1h-1zM38,8h1v1h-1zM10,9h1v1h-1zM11,9h1v1h-1zM12,9h1v1h-1zM13,9h1v1h-1zM15,9h1v1h-1zM16,9h1v1h-1zM17,9h1v1h-1zM23,9h1v1h-1zM24,9h1v1h-1zM25,9h1v1h-1zM26,9h1v1h-1zM28,9h1v1h-1zM2,10h1v1h-1zM4,10h1v1h-1zM5,10h1v1h-1zM6,10h1v1h-1zM7,10h1v1h-1zM8,10h1v1h-1zM15,10h1v1h-1zM16,10h1v1h-1zM17,10h1v1h-1zM19,10h1v1h-1zM22,10h1v1h-1zM27,10h1v1h-1zM29,10h1v1h-1zM30,10h1v1h-1zM32,10h1v1h-1zM33,10h1v1h-1zM34,10h1v1h-1zM35,10h1v1h-1zM36,10h1v1h-1zM2,11h1v1h-1zM3,11h1v1h-1zM4,11h1v1h-1zM7,11h1v1h-1zM9,11h1v1h-1zM11,11h1v1h-1zM13,11h1v1h-1zM16,11h1v1h-1zM17,11h1v1h-1zM18,11h1v1h-1zM20,11h1v1h-1zM21,11h1v1h-1zM24,11h1v1h-1zM25,11h1v1h-1zM26,11h1v1h-1zM28,11h1v1h-1zM31,11h1v1h-1zM37,11h1v1h-1zM3,12h1v1h-1zM4,12h1v1h-1zM5,12h1v1h-1zM8,12h1v1h-1zM11,12h1v1h-1zM15,12h1v1h-1zM16,12h1v1h-1zM20,12h1v1h-1zM23,12h1v1h-1zM24,12h1v1h-1zM26,12h1v1h-1zM27,12h1v1h-1zM28,12h1v1h-1zM29,12h1v1h-1zM32,12h1v1h-1zM34,12h1v1h-1zM35,12h1v1h-1zM37,12h1v1h-1zM38,12h1v1h-1zM2,13h1v1h-1zM4,13h1v1h-1zM5,13h1v1h-1zM7,13h1v1h-1zM11,13h1v1h-1zM14,13h1v1h-1zM16,13h1v1h-1zM18,13h1v1h-1zM21,13h1v1h-1zM23,13h1v1h-1zM24,13h1v1h-1zM25,13h1v1h-1zM26,13h1v1h-1zM29,13h1v1h-1zM31,13h1v1h-1zM32,13h1v1h-1zM35,13h1v1h-1zM38,13h1v1h-1zM4,14h1v1h-1zM5,14h1v1h-1zM8,14h1v1h-1zM11,14h1v1h-1zM13,14h1v1h-1zM14,14h1v1h-1zM15,14h1v1h-1zM19,14h1v1h-1zM22,14h1v1h-1zM26,14h1v1h-1zM27,14h1v1h-1zM28,14h1v1h-1zM29,14h1v1h-1zM30,14h1v1h-1zM31,14h1v1h-1zM32,14h1v1h-1zM34,14h1v1h-1zM36,14h1v1h-1zM37,14h1v1h-1zM38,14h1v1h-1zM3,15h1v1h-1zM5,15h1v1h-1zM6,15h1v1h-1zM7,15h1v1h-1zM9,15h1v1h-1zM10,15h1v1h-1zM13,15h1v1h-1zM14,15h1v1h-1zM15,15h1v1h-1zM20,15h1v1h-1zM21,15h1v1h-1zM25,15h1v1h-1zM30,15h1v1h-1zM31,15h1v1h-1zM33,15h1v1h-1zM37,15h1v1h-1zM2,16h1v1h-1zM3,16h1v1h-1zM6,16h1v1h-1zM8,16h1v1h-1zM10,16h1v1h-1zM15,16h1v1h-1zM17,16h1v1h-1zM23,16h1v1h-1zM24,16h1v1h-1zM26,16h1v1h-1zM28,16h1v1h-1zM29,16h1v1h-1zM30,16h1v1h-1zM32,16h1v1h-1zM33,16h1v1h-1zM34,16h1v1h-1zM35,16h1v1h-1zM38,16h1v1h-1zM2,17h1v1h-1zM5,17h1v1h-1zM6,17h1v1h-1zM7,17h1v1h-1zM10,17h1v1h-1zM12,17h1v1h-1zM13,17h1v1h-1zM14,17h1v1h-1zM16,17h1v1h-1zM20,17h1v1h-1zM21,17h1v1h-1zM22,17h1v1h-1zM23,17h1v1h-1zM24,17h1v1h-1zM25,17h1v1h-1zM28,17h1v1h-1zM30,17h1v1h-1zM31,17h1v1h-1zM33,17h1v1h-1zM34,17h1v1h-1zM37,17h1v1h-1zM38,17h1v1h-1zM5,18h1v1h-1zM6,18h1v1h-1zM7,18h1v1h-1zM8,18h1v1h-1zM9,18h1v1h-1zM10,18h1v1h-1zM12,18h1v1h-1zM14,18h1v1h-1zM16,18h1v1h-1zM17,18h1v1h-1zM19,18h1v1h-1zM22,18h1v1h-1zM24,18h1v1h-1zM25,18h1v1h-1zM26,18h1v1h-1zM27,18h1v1h-1zM30,18h1v1h-1zM31,18h1v1h-1zM32,18h1v1h-1zM34,18h1v1h-1zM36,18h1v1h-1zM37,18h1v1h-1zM38,18h1v1h-1zM2,19h1v1h-1zM3,19h1v1h-1zM5,19h1v1h-1zM9,19h1v1h-1zM13,19h1v1h-1zM14,19h1v1h-1zM16,19h1v1h-1zM17,19h1v1h-1zM21,19h1v1h-1zM22,19h1v1h-1zM25,19h1v1h-1zM27,19h1v1h-1zM28,19h1v1h-1zM33,19h1v1h-1zM35,19h1v1h-1zM37,19h1v1h-1zM3,20h1v1h-1zM4,20h1v1h-1zM5,20h1v1h-1zM6,20h1v1h-1zM8,20h1v1h-1zM10,20h1v1h-1zM11,20h1v1h-1zM12,20h1v1h-1zM13,20h1v1h-1zM14,20h1v1h-1zM15,20h1v1h-1zM17,20h1v1h-1zM24,20h1v1h-1zM26,20h1v1h-1zM27,20h1v1h-1zM28,20h1v1h-1zM29,20h1v1h-1zM30,20h1v1h-1zM32,20h1v1h-1zM33,20h1v1h-1zM37,20h1v1h-1zM38,20h1v1h-1zM4,21h1v1h-1zM6,21h1v1h-1zM7,21h1v1h-1zM15,21h1v1h-1zM20,21h1v1h-1zM21,21h1v1h-1zM22,21h1v1h-1zM23,21h1v1h-1zM24,21h1v1h-1zM28,21h1v1h-1zM32,21h1v1h-1zM35,21h1v1h-1zM38,21h1v1h-1zM2,22h1v1h-1zM3,22h1v1h-1zM4,22h1v1h-1zM5,22h1v1h-1zM6,22h1v1h-1zM8,22h1v1h-1zM11,22h1v1h-1zM12,22h1v1h-1zM14,22h1v1h-1zM16,22h1v1h-1zM17,22h1v1h-1zM18,22h1v1h-1zM19,22h1v1h-1zM22,22h1v1h-1zM24,22h1v1h-1zM26,22h1v1h-1zM27,22h1v1h-1zM28,22h1v1h-1zM29,22h1v1h-1zM31,22h1v1h-1zM32,22h1v1h-1zM34,22h1v1h-1zM36,22h1v1h-1zM3,23h1v1h-1zM4,23h1v1h-1zM9,23h1v1h-1zM10,23h1v1h-1zM11,23h1v1h-1zM12,23h1v1h-1zM16,23h1v1h-1zM18,23h1v1h-1zM21,23h1v1h-1zM22,23h1v1h-1zM25,23h1v1h-1zM26,23h1v1h-1zM28,23h1v1h-1zM30,23h1v1h-1zM35,23h1v1h-1zM3,24h1v1h-1zM5,24h1v1h-1zM8,24h1v1h-1zM10,24h1v1h-1zM11,24h1v1h-1zM13,24h1v1h-1zM14,24h1v1h-1zM15,24h1v1h-1zM16,24h1v1h-1zM17,24h1v1h-1zM18,24h1v1h-1zM19,24h1v1h-1zM22,24h1v1h-1zM23,24h1v1h-1zM24,24h1v1h-1zM27,24h1v1h-1zM29,24h1v1h-1zM32,24h1v1h-1zM33,24h1v1h-1zM34,24h1v1h-1zM35,24h1v1h-1zM37,24h1v1h-1zM38,24h1v1h-1zM3,25h1v1h-1zM5,25h1v1h-1zM7,25h1v1h-1zM9,25h1v1h-1zM12,25h1v1h-1zM14,25h1v1h-1zM17,25h1v1h-1zM18,25h1v1h-1zM20,25h1v1h-1zM21,25h1v1h-1zM22,25h1v1h-1zM23,25h1v1h-1zM25,25h1v1h-1zM26,25h1v1h-1zM28,25h1v1h-1zM29,25h1v1h-1zM33,25h1v1h-1zM34,25h1v1h-1zM37,25h1v1h-1zM38,25h1v1h-1zM3,26h1v1h-1zM8,26h1v1h-1zM9,26h1v1h-1zM12,26h1v1h-1zM14,26h1v1h-1zM16,26h1v1h-1zM17,26h1v1h-1zM18,26h1v1h-1zM19,26h1v1h-1zM21,26h1v1h-1zM24,26h1v1h-1zM26,26h1v1h-1zM27,26h1v1h-1zM29,26h1v1h-1zM32,26h1v1h-1zM34,26h1v1h-1zM36,26h1v1h-1zM37,26h1v1h-1zM38,26h1v1h-1zM2,27h1v1h-1zM3,27h1v1h-1zM6,27h1v1h-1zM7,27h1v1h-1zM10,27h1v1h-1zM11,27h1v1h-1zM13,27h1v1h-1zM18,27h1v1h-1zM20,27h1v1h-1zM21,27h1v1h-1zM23,27h1v1h-1zM25,27h1v1h-1zM28,27h1v1h-1zM30,27h1v1h-1zM31,27h1v1h-1zM33,27h1v1h-1zM2,28h1v1h-1zM4,28h1v1h-1zM6,28h1v1h-1zM8,28h1v1h-1zM12,28h1v1h-1zM14,28h1v1h-1zM15,28h1v1h-1zM17,28h1v1h-1zM18,28h1v1h-1zM19,28h1v1h-1zM22,28h1v1h-1zM23,28h1v1h-1zM26,28h1v1h-1zM29,28h1v1h-1zM37,28h1v1h-1zM38,28h1v1h-1zM2,29h1v1h-1zM7,29h1v1h-1zM9,29h1v1h-1zM12,29h1v1h-1zM14,29h1v1h-1zM15,29h1v1h-1zM16,29h1v1h-1zM17,29h1v1h-1zM18,29h1v1h-1zM20,29h1v1h-1zM21,29h1v1h-1zM23,29h1v1h-1zM24,29h1v1h-1zM31,29h1v1h-1zM32,29h1v1h-1zM33,29h1v1h-1zM35,29h1v1h-1zM37,29h1v1h-1zM2,30h1v1h-1zM4,30h1v1h-1zM5,30h1v1h-1zM6,30h1v1h-1zM7,30h1v1h-1zM8,30h1v1h-1zM9,30h1v1h-1zM13,30h1v1h-1zM14,30h1v1h-1zM15,30h1v1h-1zM16,30h1v1h-1zM17,30h1v1h-1zM19,30h1v1h-1zM21,30h1v1h-1zM24,30h1v1h-1zM27,30h1v1h-1zM28,30h1v1h-1zM29,30h1v1h-1zM30,30h1v1h-1zM31,30h1v1h-1zM32,30h1v1h-1zM33,30h1v1h-1zM34,30h1v1h-1zM36,30h1v1h-1zM38,30h1v1h-1zM10,31h1v1h-1zM12,31h1v1h-1zM14,31h1v1h-1zM18,31h1v1h-1zM19,31h1v1h-1zM20,31h1v1h-1zM21,31h1v1h-1zM24,31h1v1h-1zM25,31h1v1h-1zM30,31h1v1h-1zM34,31h1v1h-1zM35,31h1v1h-1zM37,31h1v1h-1zM2,32h1v1h-1zM3,32h1v1h-1zM4,32h1v1h-1zM5,32h1v1h-1zM6,32h1v1h-1zM7,32h1v1h-1zM8,32h1v1h-1zM17,32h1v1h-1zM18,32h1v1h-1zM20,32h1v1h-1zM22,32h1v1h-1zM23,32h1v1h-1zM27,32h1v1h-1zM30,32h1v1h-1zM32,32h1v1h-1zM34,32h1v1h-1zM36,32h1v1h-1zM38,32h1v1h-1zM2,33h1v1h-1zM8,33h1v1h-1zM10,33h1v1h-1zM11,33h1v1h-1zM14,33h1v1h-1zM15,33h1v1h-1zM23,33h1v1h-1zM24,33h1v1h-1zM28,33h1v1h-1zM30,33h1v1h-1zM34,33h1v1h-1zM35,33h1v1h-1zM37,33h1v1h-1zM2,34h1v1h-1zM4,34h1v1h-1zM5,34h1v1h-1zM6,34h1v1h-1zM8,34h1v1h-1zM10,34h1v1h-1zM12,34h1v1h-1zM14,34h1v1h-1zM16,34h1v1h-1zM17,34h1v1h-1zM19,34h1v1h-1zM21,34h1v1h-1zM24,34h1v1h-1zM27,34h1v1h-1zM29,34h1v1h-1zM30,34h1v1h-1zM31,34h1v1h-1zM32,34h1v1h-1zM33,34h1v1h-1zM34,34h1v1h-1zM36,34h1v1h-1zM37,34h1v1h-1zM2,35h1v1h-1zM4,35h1v1h-1zM5,35h1v1h-1zM6,35h1v1h-1zM8,35h1v1h-1zM10,35h1v1h-1zM11,35h1v1h-1zM12,35h1v1h-1zM15,35h1v1h-1zM16,35h1v1h-1zM18,35h1v1h-1zM19,35h1v1h-1zM21,35h1v1h-1zM22,35h1v1h-1zM23,35h1v1h-1zM25,35h1v1h-1zM26,35h1v1h-1zM27,35h1v1h-1zM28,35h1v1h-1zM29,35h1v1h-1zM30,35h1v1h-1zM32,35h1v1h-1zM34,35h1v1h-1zM37,35h1v1h-1zM38,35h1v1h-1zM2,36h1v1h-1zM4,36h1v1h-1zM5,36h1v1h-1zM6,36h1v1h-1zM8,36h1v1h-1zM10,36h1v1h-1zM12,36h1v1h-1zM16,36h1v1h-1zM17,36h1v1h-1zM18,36h1v1h-1zM20,36h1v1h-1zM23,36h1v1h-1zM28,36h1v1h-1zM30,36h1v1h-1zM35,36h1v1h-1zM36,36h1v1h-1zM37,36h1v1h-1zM38,36h1v1h-1zM2,37h1v1h-1zM8,37h1v1h-1zM11,37h1v1h-1zM14,37h1v1h-1zM15,37h1v1h-1zM21,37h1v1h-1zM22,37h1v1h-1zM23,37h1v1h-1zM26,37h1v1h-1zM29,37h1v1h-1zM30,37h1v1h-1zM32,37h1v1h-1zM34,37h1v1h-1zM35,37h1v1h-1zM38,37h1v1h-1zM2,38h1v1h-1zM3,38h1v1h-1zM4,38h1v1h-1zM5,38h1v1h-1zM6,38h1v1h-1zM7,38h1v1h-1zM8,38h1v1h-1zM10,38h1v1h-1zM12,38h1v1h-1zM13,38h1v1h-1zM15,38h1v1h-1zM17,38h1v1h-1zM18,38h1v1h-1zM19,38h1v1h-1zM21,38h1v1h-1zM24,38h1v1h-1zM25,38h1v1h-1zM27,38h1v1h-1zM28,38h1v1h-1zM31,38h1v1h-1zM32,38h1v1h-1zM34,38h1v1h-1zM36,38h1v1h-1zM37,38h1v1h-1zM38,38h1v1h-1z" fill="#000"/></svg></div>
+</div>
+    <p class="note">各工具內容只供參考，不構成任何保險、投資或法律建議；詳情以各機構最新公布為準。</p>
+    <p class="mk-copy">© <span class="mk-year">2026</span> Michael Koo Protection Alliance (MKPA). 版權所有。</p>
+  </footer>
+</main>
+
+<script>
+/* 工具清單由 mkpa-tools repo 嘅 tools.json 自動讀取：加新工具只要改嗰個檔案，主頁唔使改 */
+var SRC = "https://raw.githubusercontent.com/mickoo129/mkpa-tools/main/tools.json";
+var CAT = {1:"var(--mk-cat-1)",2:"var(--mk-cat-2)",3:"var(--mk-cat-3)",4:"var(--mk-cat-4)",5:"var(--mk-cat-5)",6:"var(--mk-cat-6)",7:"var(--mk-cat-7)",8:"var(--mk-cat-8)"};
+var DATA = null;
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function safeUrl(u){return /^https:\/\//.test(u||"")?u:"#";}
+function render(){
+  var box=document.getElementById("list"), q=document.getElementById("q").value.trim().toLowerCase();
+  var tools=DATA.tools.filter(function(t){return t.show!==false;});
+  if(q) tools=tools.filter(function(t){return (t.name+t.sub+(t.desc||"")).toLowerCase().indexOf(q)>-1;});
+  if(!tools.length){box.innerHTML='<p class="empty">搵唔到相關工具。</p>';return;}
+  var groups=(DATA.groups||[]).concat([{id:"_other",name:"其他工具",cat:7}]), html="";
+  groups.forEach(function(g){
+    var ts=tools.filter(function(t){return g.id==="_other"?!DATA.groups.some(function(x){return x.id===t.group;}):t.group===g.id;});
+    if(!ts.length) return;
+    html+='<section class="group" style="--c:'+(CAT[g.cat]||CAT[7])+'"><h2><i></i>'+esc(g.name)+' <small>'+ts.length+' 個</small></h2><div class="grid">';
+    ts.forEach(function(t){var u=safeUrl(t.url);
+      html+='<a class="tool" href="'+esc(u)+'" target="_blank" rel="noopener"><div class="tool-top"><img src="'+esc(u.replace(/\/?$/,"/"))+'favicon.svg" alt="" width="40" height="40" loading="lazy"><span><b>'+esc(t.name)+'</b><span class="sub">'+esc(t.sub)+'</span></span></div>'+
+        (t.desc?'<p>'+esc(t.desc)+'</p>':'')+'<span class="go">開啟工具（新分頁）↗</span><span class="url">'+esc(u)+'</span></a>';});
+    html+='</div></section>';
+  });
+  box.innerHTML=html;
+}
+fetch(SRC+"?t="+Math.floor(Date.now()/600000),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json();})
+  .then(function(d){DATA=d;render();})
+  .catch(function(){document.getElementById("list").innerHTML='<p class="err">暫時載入唔到工具清單，請稍後再試。</p>';});
+document.getElementById("q").addEventListener("input",function(){if(DATA)render();});
+</script>
+<script>
+/* 分享呢個方案：手機彈出分享選單（WhatsApp 等），電腦複製連結。
+   url 要包括客人揀嘅設定（例如放喺 # 後面），但唔可以包括客人姓名。 */
+function mkShare(url){
+  url=url||location.href;
+  if(navigator.share&&matchMedia('(pointer:coarse)').matches){navigator.share({title:document.title,url:url}).catch(function(){});return;}
+  (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(
+    function(){mkToast('已複製連結，客人撳開會見到同一個方案');},
+    function(){window.prompt('複製呢條連結：',url);});
+}
+function mkToast(msg){var t=document.createElement('div');t.className='mk-toast';t.setAttribute('role','status');t.textContent=msg;(document.querySelector('dialog[open]')||document.body).appendChild(t);setTimeout(function(){t.remove();},2400);}
+</script>
+<script>
+(function(){var d=new Date();
+document.querySelectorAll('.mk-year').forEach(function(e){e.textContent=d.getFullYear();});
+document.querySelectorAll('.mk-print-date').forEach(function(e){e.textContent=d.getFullYear()+' 年 '+(d.getMonth()+1)+' 月 '+d.getDate()+' 日';});})();
+</script>
+</body>
+</html>
