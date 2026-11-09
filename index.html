@@ -176,11 +176,11 @@ footer .note{font-size:13px;color:var(--mk-muted);margin:18px 0 0}
 <main class="mk-wrap">
   <section class="hero">
     <h1>實用工具一覽</h1>
-    <p>保險比較、保費規劃、理賠數據、醫院、強積金、息口，同政府福利指南。全部免費使用，撳入去就用得。</p>
+    <p>保險比較、保費規劃、理賠數據、醫院、強積金、息口，以及政府福利指南。全部免費，點選即可使用。</p>
     <label class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="搜尋工具，例如：醫保、強積金、公屋" aria-label="搜尋工具"></label>
   </section>
-  <div id="list"><p class="empty">載入緊工具清單…</p></div>
+  <div id="list"><p class="empty">正在載入工具清單…</p></div>
 
   <footer>
     <div class="mk-ecard">
@@ -204,7 +204,7 @@ function render(){
   var box=document.getElementById("list"), q=document.getElementById("q").value.trim().toLowerCase();
   var tools=DATA.tools.filter(function(t){return t.show!==false;});
   if(q) tools=tools.filter(function(t){return (t.name+t.sub+(t.desc||"")).toLowerCase().indexOf(q)>-1;});
-  if(!tools.length){box.innerHTML='<p class="empty">搵唔到相關工具。</p>';return;}
+  if(!tools.length){box.innerHTML='<p class="empty">找不到相關工具。</p>';return;}
   var groups=(DATA.groups||[]).concat([{id:"_other",name:"其他工具",cat:7}]), html="";
   groups.forEach(function(g){
     var ts=tools.filter(function(t){return g.id==="_other"?!DATA.groups.some(function(x){return x.id===t.group;}):t.group===g.id;});
@@ -219,7 +219,7 @@ function render(){
 }
 fetch(SRC+"?t="+Math.floor(Date.now()/600000),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json();})
   .then(function(d){DATA=d;render();})
-  .catch(function(){document.getElementById("list").innerHTML='<p class="err">暫時載入唔到工具清單，請稍後再試。</p>';});
+  .catch(function(){document.getElementById("list").innerHTML='<p class="err">暫時未能載入工具清單，請稍後再試。</p>';});
 document.getElementById("q").addEventListener("input",function(){if(DATA)render();});
 </script>
 <script>
@@ -251,12 +251,12 @@ document.querySelectorAll('.mk-print-date').forEach(function(e){e.textContent=d.
   function help(){
     var old=document.querySelector(".mk-printhelp"); if(old) old.remove();
     var d=document.createElement("div"); d.className="mk-printhelp"; d.setAttribute("role","dialog"); d.setAttribute("aria-label","列印提示");
-    d.innerHTML='<p><b>呢個畫面唔支援列印</b>由主畫面 icon 或者 WhatsApp、IG 等 app 開，手機唔俾列印。請撳「複製連結」，貼去 Safari 或 Chrome 開，再撳「列印 / 存 PDF」。</p><div><button type="button" class="mk-printhelp-copy">複製連結</button><button type="button" class="mk-printhelp-close">知道</button></div>';
+    d.innerHTML='<p><b>此畫面不支援列印</b>從主畫面圖示或 WhatsApp、IG 等應用程式開啟時，手機無法列印。請按「複製連結」，貼到 Safari 或 Chrome 開啟，再按「列印 / 存 PDF」。</p><div><button type="button" class="mk-printhelp-copy">複製連結</button><button type="button" class="mk-printhelp-close">知道了</button></div>';
     document.body.appendChild(d);
     d.querySelector(".mk-printhelp-close").onclick=function(){d.remove();};
     d.querySelector(".mk-printhelp-copy").onclick=function(){
       var b=this,u=location.href,ok=function(){b.textContent="已複製";};
-      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(ok,function(){prompt("複製呢條連結：",u);});}else{prompt("複製呢條連結：",u);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(ok,function(){prompt("請複製這條連結：",u);});}else{prompt("請複製這條連結：",u);}
     };
   }
   window.mkPrintBlocked=blocked; window.mkPrintHelp=help;
